@@ -5,6 +5,7 @@ from aiogram.dispatcher.filters.state import StatesGroup, State
 from aiogram.dispatcher.filters import Text
 import time
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
+
 from config import TOKEN, MSG
 from database import Database
 from Buttons import OptionsButton, KeybordButtons, MenuButton, DeleteButtons, ChoiseOnAdding, ChoiseOnCreating_in, menu
@@ -66,7 +67,7 @@ class MyBot():
                 if result == []:
                     await callback.message.answer('Коллекции еще не созданы, создать новую ?', reply_markup = ChoiseOnCreating_in)
                 else:
-                    await callback.message.answer('Напиши название коллекции, в которую ты хочешь добавить фотографию',reply_markup = KeybordButtons)
+                    await callback.message.answer('Напиши название для коллекции, в которую ты хочешь добавить фотографию',reply_markup = KeybordButtons)
                     await AddingColl.name_coll.set()
                     self._adding()
 
@@ -264,12 +265,15 @@ class MyBot():
             if data['descr'] in descriptions:
                 await message.answer('Ищу фотографию, нужно немного подождать')
                 time.sleep(1)
-                image = self.database.get_image(id = message.from_user.id, descr = data['descr'])
+                result = self.database.get_image(id = message.from_user.id, descr = data['descr'])
                 await message.answer('Смотри какая красота',
                                         reply_markup=KeybordButtons)
                 time.sleep(0.5)
-                await message.answer_photo(image)
-                
+                create_time = result["time"]
+                if create_time == None:
+                    await message.answer_photo(result['image'], f'{data["name_coll"]}, {data["descr"]}')
+                else:
+                    await message.answer_photo(result['image'], f'{data["name_coll"]}, {data["descr"]} \nБыла добавлена {str(create_time).split(" ")[0]} в {str(create_time).split(" ")[1]}')
                 await state.finish()
                 return
             else:

@@ -21,7 +21,7 @@ ChoiseOnAdding = ReplyKeyboardMarkup(resize_keyboard = True)
 create_but = InlineKeyboardButton(text='Создать коллекцию', callback_data='create')
 add_img = InlineKeyboardButton(text='Добавить фото в коллекцию', callback_data='add')
 show_img = InlineKeyboardButton(text='Посмотреть фото из коллекции', callback_data='show_img')
-show_coll = InlineKeyboardButton(text='Посмотреть существующие коллкции', callback_data='show_coll')
+show_coll = InlineKeyboardButton(text='Посмотреть существующие коллекции', callback_data='show_coll')
 
 create_new = InlineKeyboardButton(text = 'Создать новую', callback_data = 'create')
 back_menu = InlineKeyboardButton(text = 'Список команд', callback_data = 'menu')

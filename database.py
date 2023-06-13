@@ -1,6 +1,12 @@
 import pymysql.cursors
+import time
 from config import host, user, password, db_name
 
+def get_time() -> str:
+    seconds = time.time()
+    cur_time = time.localtime(seconds)
+    datetime = f'{cur_time.tm_year}-{cur_time.tm_mon}-{cur_time.tm_mday} {cur_time.tm_hour}:{cur_time.tm_min}:{cur_time.tm_sec}'
+    return datetime
 
 class Database():
     def __init__(self) -> None:
@@ -28,10 +34,8 @@ class Database():
     def create_collection(self, id : int, name_coll : str, descr : str, img : str) -> bool:
         try:
             with self.connector.cursor() as cursor:
-                insert_collections = f"insert into collections (id, name_coll) values ('{id}', '{name_coll}');"
-                insert_images = f"insert into images (id, name_coll, descr, image) values ('{id}','{name_coll}', '{descr}', '{img}');"
-                cursor.execute(insert_collections)
-                cursor.execute(insert_images)
+                cursor.execute("insert into collections values (%s, %s);", (id, name_coll))
+                cursor.execute("insert into images values (%s, %s, %s, %s, %s)", (id, name_coll, descr, img, get_time()))
                 self.connector.commit()
                 print('succesfully insert')
                 return True
@@ -42,8 +46,7 @@ class Database():
     def add_image(self, id :int, name_coll : str, descr : str, img : str) -> bool:
         try:
             with self.connector.cursor() as cursor:
-                insert_image = f"insert into images (id, name_coll, descr, image) values ('{id}','{name_coll}', '{descr}', '{img}');"
-                cursor.execute(insert_image)
+                cursor.execute("insert into images values (%s, %s, %s, %s, %s)", (id, name_coll, descr, img, get_time()))
                 self.connector.commit()
                 print('succesfully adding')
                 return True
@@ -54,8 +57,7 @@ class Database():
     def show_collection(self, id : int) -> list:
             output = []
             cursor = self.connector.cursor()
-            all_collection_user = f'select name_coll from collections where id = {id};'
-            cursor.execute(all_collection_user)
+            cursor.execute('select name_coll from collections where id = %s;', (id))
             result = cursor.fetchall()
             for elem in result:
                  output.append(elem['name_coll'])
@@ -64,8 +66,7 @@ class Database():
     def _check_collections(self, id : int, name_coll : str) -> bool:
         try:
             with self.connector.cursor() as cursor:
-                    all_collection_user = f'select name_coll from collections where id = {id};'
-                    cursor.execute(all_collection_user)
+                    cursor.execute('select name_coll from collections where id = %s;', (id,))
                     result = cursor.fetchall()
                     for elem in result:
                         if name_coll == elem['name_coll'] :
@@ -77,8 +78,7 @@ class Database():
     def _get_descriptions(self,id : int, name_coll : str) -> list:
         try:
             with self.connector.cursor() as cursor:
-                    all_collection_user = f"select descr from images where id = '{id}' and name_coll = '{name_coll}';"
-                    cursor.execute(all_collection_user)
+                    cursor.execute("select descr from images where id = %s and name_coll = %s;", (id, name_coll))
                     result = cursor.fetchall()
                     output = []
                     for elem in result:
@@ -87,13 +87,11 @@ class Database():
         except Exception as e:
             print(e)
 
-    def get_image(self,id : int, descr : str) -> str:
+    def get_image(self,id : int, descr : str) -> dict:
         try:
             with self.connector.cursor() as cursor:
-                    all_collection_user = f"select image from images where id = '{id}' and descr = '{descr}';"
-                    cursor.execute(all_collection_user)
+                    cursor.execute("select image, time from images where id = %s and descr = %s;", (id, descr))
                     result = cursor.fetchone()
-                    result = result['image']
                     return result
         except Exception as e:
             print(e)
@@ -102,10 +100,8 @@ class Database():
         try:
             with self.connector.cursor() as cursor:
                     for elem in list_coll:
-                        delete_from_images = f"delete from images where name_coll = '{elem}' and id = '{id}';"
-                        cursor.execute(delete_from_images)
-                    delete_from_collections = f"delete from collections where id = '{id}';"
-                    cursor.execute(delete_from_collections)
+                        cursor.execute("delete from images where name_coll = %s and id = %s;", (elem, id))
+                    cursor.execute("delete from collections where id = %s;", (id,))
                     self.connector.commit()
                     return True
         except Exception as e:
@@ -115,10 +111,8 @@ class Database():
     def delete_one_coll(self, name_coll : str, id : int) -> bool:
         try:
             with self.connector.cursor() as cursor:
-                    delete_from_images = f"delete from images where name_coll = '{name_coll}' and id = '{id}';"
-                    cursor.execute(delete_from_images)
-                    delete_from_collections = f"delete from collections where name_coll = '{name_coll}';"
-                    cursor.execute(delete_from_collections)
+                    cursor.execute("delete from images where name_coll = %s and id = %s;", (name_coll, id))
+                    cursor.execute("delete from collections where name_coll = %s;", (name_coll,))
                     self.connector.commit()
                     return True
         except Exception as e:
