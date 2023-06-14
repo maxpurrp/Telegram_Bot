@@ -117,7 +117,7 @@ class MyBot():
         
         @self.dp.message_handler(state="*", commands='Добавить')
         @self.dp.message_handler(Text(equals = 'Добавить', ignore_case = True), state = "*")
-        async def cancel(message : types.Message, state = FSMContext):
+        async def add_image(message : types.Message, state = FSMContext):
             await message.reply('Напиши описание к фотографии',reply_markup = MenuButton)
             await AddingColl.img_descr.set()
             self._adding()

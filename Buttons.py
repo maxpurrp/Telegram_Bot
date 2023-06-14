@@ -17,7 +17,6 @@ ChoiseOnCreating_kb = ReplyKeyboardMarkup(resize_keyboard = True)
 
 ChoiseOnAdding = ReplyKeyboardMarkup(resize_keyboard = True)
 
-
 create_but = InlineKeyboardButton(text='Создать коллекцию', callback_data='create')
 add_img = InlineKeyboardButton(text='Добавить фото в коллекцию', callback_data='add')
 show_img = InlineKeyboardButton(text='Посмотреть фото из коллекции', callback_data='show_img')
